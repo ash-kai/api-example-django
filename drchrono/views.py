@@ -2,11 +2,13 @@ from django.shortcuts import render, redirect
 # Create your views here.
 from . import authenticate, utility
 import datetime, pytz
+from models import Token
 
 def index(request):
-	if 'access_token' in request.session:
+	if 'user' in request.session:
 		# doc = authenticate.get_doctor(request.session['doctor'])
-		appointments = authenticate.getAppointments(request.session['access_token'])
+		token = Token.objects.get(pk = request.session['user'])
+		appointments = authenticate.getAppointments(token.access_token)
 		context = {
 			"appointments": appointments
 		}
@@ -19,21 +21,21 @@ def index(request):
 
 def authorize(request):
 	print "the code is %s" %(request.GET.get("code"))
-	token = authenticate.getToken(request.GET.get("code",None))
-	print token
-	expires_timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(seconds=token['expires_in'])
-	print expires_timestamp
-	request.session['access_token'] = token["access_token"]
-	request.session['refresh_token'] = token["refresh_token"]
-	#request.session['expires'] = expires_timestamp
-	context = {
-	"token" : token,
-	}
-	return render(request, "dashboard.html", context)
+	authToken = authenticate.getToken(request.GET.get("code",None))
+	expires_timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(seconds=authToken['expires_in'])
+	print "Expires Timestamp %s" %expires_timestamp
+	token = Token.objects.create(
+		access_token = authToken['access_token'], 
+		refresh_token = authToken['refresh_token'], 
+		expire_timestamp = expires_timestamp)
+	token.save()
+	request.session['user'] = token.pk;
+	return redirect('/')
 
 def profile(request):
-	if 'access_token' in request.session:
-		docInfo = authenticate.getDoctorInfo(request.session['access_token'])
+	if 'user' in request.session:
+		token = Token.objects.get(pk = request.session['user'])
+		docInfo = authenticate.getDoctorInfo(token.access_token)
 		print docInfo
 		context = {
 		'profile' : docInfo,
