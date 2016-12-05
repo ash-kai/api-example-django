@@ -1,0 +1,70 @@
+{% load staticfiles %}
+<html>
+<head>        
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.css" rel="stylesheet" type="text/css"/>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.js"></script>
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+	<link href='//fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+	<style>
+		body{
+			min-height:100%;
+			clear: both; 
+			position:relative;
+		}
+		.main-content{
+			padding-bottom:60px;
+		}
+		.master-footer{
+			background-color: #555;
+			color:white;
+			padding: 15px;
+			clear: both;
+			position: absolute;
+			height:60px;
+			right: 0;
+			bottom: 0;
+			left: 0;
+		}
+		.sign-up{
+			width:400px;
+			margin:auto;
+		}
+	</style>
+	{{form.media}}
+	{% block title %} <title> Proxy Receptionist </title> {% endblock title %}
+</head>
+<body>
+	<div class="navbar navbar-inverse">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<h1 style="color:#777;"> Appointments </h1>
+			</div>
+			<div class="collapse navbar-collapse navbar-menubuilder" id="main-navigation">
+				<ul class="nav navbar-right navbar-nav" >
+					<li><a href="#" style="font-size:16px;">Home</a></li>
+					<li><a href="#" style="font-size:16px;">About Us</a></li>
+					<li><a href="#" style="font-size:16px;">Contact Us</a></li>
+				</ul>
+			</div>			
+		</div>
+	</div>
+	{% if messages %}
+	<ul class="messages">
+		{% for message in messages %}
+		<li {% if message.tags %} class="{{message.tags}}" {% endif %}> {{message}} </li>
+		{% endfor %}
+	</ul>
+	{% endif %}
+
+	<div class="content container wrapper main-content">
+		{% block content %}
+		{% endblock %}
+		<br>
+	</div>
+	<footer class="container-fluid text-center master-footer">
+		<p>CopyRight by Ashish@2016</p>
+	</footer>
+</body>
+</html>

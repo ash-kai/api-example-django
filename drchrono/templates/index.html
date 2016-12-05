@@ -1,8 +1,15 @@
-<!DOCTYPE html>
-<html>
-  <body>
-    <a href="{% url 'social:begin' 'drchrono' %}">
-      drchrono OAuth
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="text-center">
+<h1> You are not signed In. Please sign with drCrhono </h1>
+    <a href="https://drchrono.com/o/authorize?client_id={{ client_id }}&response_type=code">
+        <button class="btn btn-primary">
+            Sign in
+        </button>
     </a>
-  </body>
-</html>
+</div>
+
+{% endblock %}
