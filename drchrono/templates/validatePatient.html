@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	<form method='post' class='post-form sign-up'>
+	    {% csrf_token %}
+		<fieldset>
+		  <legend> Login </legend>
+			<div class="form-group">
+				<div>
+					<label control="label-for" class="id_firstNameL">First Name</label>    	
+			      		<input type="text" class="form-control"
+						name="firstName"
+						id="id_firstName" value="">     
+				</div>
+				<br>
+				<div>
+					<label control="label-for" class="id_lastNameL">Last Name</label>    	
+			      		<input type="text" class="form-control"
+						name="lastName"
+						id="id_lastName"
+						value="" >       
+				</div>
+			</div>       			
+		    <footer class="center text-center">
+		    	<input type='submit' name='validate' value='Validate User' class="btn btn-default"/>
+		    </footer>
+		{% if error %}
+			<p class="text-error"> {{error}} </p>
+		{% endif %}
+		</fieldset>
+	</form>
+{% endblock %}
+

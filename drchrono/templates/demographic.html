@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	<form action="demographic" method='post' class='post-form sign-up'>
+	    {% csrf_token %}
+		<fieldset>
+		  <legend> Demographic info </legend>
+			<div class="form-group">
+				<div>
+			      		<input type="hidden" class="form-control"
+						name="appointmentId"
+						id="id_appointmentId" value="{{appointmentId}}">     
+				</div>
+				<br>
+				<div>	
+			      		<input type="hidden" class="form-control"
+						name="patientId"
+						id="id_patientId" value="{{patientId}}">     
+				</div>
+				<br>
+				<div>
+					<label control="label-for" class="id_addressL">Address</label>    	
+			      		<input type="text" class="form-control"
+						name="address"
+						id="id_address"
+						value="" >       
+				</div>
+				<br>
+				<div>
+					<label control="label-for" class="id_phoneL">Phone Number</label>    	
+			      		<input type="text" class="form-control"
+						name="phone"
+						id="id_phone"
+						value="" >       
+				</div>
+				<br>
+				<div>
+					<label control="label-for" class="id_phoneL">Zip Code</label>    	
+			      		<input type="text" class="form-control"
+						name="zipCode"
+						id="id_zipCode"
+						value="" >       
+				</div>
+			</div>       			
+		    <footer class="center text-center">
+		    	<input type='submit' name='validate' value='Validate User' class="btn btn-default"/>
+		    </footer>
+		{% if error %}
+			<p class="text-error"> {{error}} </p>
+		{% endif %}
+		</fieldset>
+	</form>
+{% endblock %}
+

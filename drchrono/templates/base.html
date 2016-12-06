@@ -43,9 +43,11 @@
 			</div>
 			<div class="collapse navbar-collapse navbar-menubuilder" id="main-navigation">
 				<ul class="nav navbar-right navbar-nav" >
-					<li><a href="#" style="font-size:16px;">Home</a></li>
-					<li><a href="#" style="font-size:16px;">About Us</a></li>
-					<li><a href="#" style="font-size:16px;">Contact Us</a></li>
+					{% if user.is_authenticated %}
+						<li><a href="logout" style="font-size:16px;">Logout</a></li>
+					{% else %}
+						<li><a href="login" style="font-size:16px;">Login</a></li>
+					{% endif %}
 				</ul>
 			</div>			
 		</div>

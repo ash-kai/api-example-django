@@ -5,7 +5,35 @@
 
 <div class="text-center">
 <h1> This page would shows appointments for the current day </h1>
-<h3>{{token}}</h3>
+<table class="table table-striped">
+    
+    <thead>
+      <tr>
+        <th> Scheduled Time </th>
+        <th> Duration </th>
+        <th> Status </th>
+      </tr>
+    </thead>
+
+    <tbody>
+    {% for appointment in appointments %}
+	
+      <tr>
+        <td> {{ appointment.scheduled_time }} </td>
+        <td> {{ appointment.duration }} </td>
+        <td> {{ appointment.status|default_if_none:"" }}  </td>
+        {% if user.is_authenticated %}
+        <td> <a href="{{appointment.id}}/stopTimer" class="btn btn-primary">Stop</button> </td>
+        {% endif %}
+      </tr>
+      
+	{% endfor %}
+     
+    </tbody>
+  </table>
+  <br>
+  <a href="patient" name="checkIn" class="btn btn-primary">Check In</a>
+
 </div>
 
 {% endblock %}
