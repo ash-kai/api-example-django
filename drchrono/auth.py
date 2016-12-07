@@ -1,12 +1,13 @@
 import requests
 import datetime
 from django.conf import settings
-#To connect to drChrono api
+from config import *
+from django.utils import timezone
 
-client_id = "uXIJz6c0WeIW1QOJPQuRjwEyEywRB5aVR1dRT7mp"
-client_secret = "eVeX00W1UD1EyrJlk1HNil5YQn5CeVfSxeVtscH8b8RRu0O3I2XKTLEbj57jfwhIr0XFmZOH0ZJYl78BLsRwlNqxWKjto9nNigpN6aFmqnqHp1jtKapYJq7VqE10xEEd"
+# client_id = "uXIJz6c0WeIW1QOJPQuRjwEyEywRB5aVR1dRT7mp"
+# client_secret = "eVeX00W1UD1EyrJlk1HNil5YQn5CeVfSxeVtscH8b8RRu0O3I2XKTLEbj57jfwhIr0XFmZOH0ZJYl78BLsRwlNqxWKjto9nNigpN6aFmqnqHp1jtKapYJq7VqE10xEEd"
 
-def getToken(code):
+def get_token(code):
 	data = {
 		"grant_type":    "authorization_code",
 		"client_id":     client_id,
@@ -17,9 +18,8 @@ def getToken(code):
 	response = requests.post("https://drchrono.com/o/token/", data=data)
 	response.raise_for_status()
 	return response.json()
-	#to obtain access token and refresh token
-
-def refreshToken(refresh_token):
+	
+def refresh_token(refresh_token):
 	data = {
 		"grant_type":    "refresh_token",
 		"client_id":     client_id,
@@ -29,62 +29,98 @@ def refreshToken(refresh_token):
 	response = requests.post("https://drchrono.com/o/token/", data=data)
 	response.raise_for_status()
 	return response.json()
-	#To obtain new access token after the previous token expires
 
-def getAppointments(access_token):
+def recharge_token(func):
+	def recharge(*args, **kwargs):
+		token = args[0]
+		if token.expire_timestamp < timezone.now():
+			new_tokens = refresh_token(token.refresh_token)
+			token.access_token = new_tokens["access_token"]
+			token.refresh_token = new_tokens["refresh_token"]
+			token.expire_timestamp = datetime.datetime.now() +\
+					datetime.timedelta(seconds=new_tokens["expires_in"])
+			token.save()
+		return func(*args, **kwargs)
+	return recharge
+
+def get_api(url, payload):
+	data = payload['data']
+	headers = get_auth_header(payload['access_token'])
+	response = requests.get(url, params=data, headers=headers)
+	response.raise_for_status()
+	return response
+
+def patch_api(url, payload):
+	data = payload['data']
+	headers = get_auth_header(payload['access_token'])
+	response = requests.patch(url, data=data, headers=headers)
+	print response
+	response.raise_for_status()
+	return response
+
+@recharge_token
+def getAppointments(token):
 	data = {
 	"date" : datetime.datetime.today().isoformat(),
 	}
-	headers = get_auth_header(access_token)
-	response = requests.get('https://drchrono.com/api/appointments', params=data, headers=headers)
-	response.raise_for_status()
-	result = response.json()
-	return result['results']
+	payload = {
+	"access_token": token.access_token,
+	"data": data,
+	}
+	return get_api('https://drchrono.com/api/appointments', payload)
 
-def getAppointmentsPerPatient(access_token, patientId):
+@recharge_token
+def getAppointmentsPerPatient(token, patientId):
 	data = {
 	"date" : datetime.datetime.now().date(),
 	"patient" : patientId,
 	}
-	headers = get_auth_header(access_token)
-	response = requests.get('https://drchrono.com/api/appointments', params=data, headers=headers)
-	response.raise_for_status()
-	return response
+	payload = {
+	"access_token": token.access_token,
+	"data": data,
+	}
+	return get_api('https://drchrono.com/api/appointments', payload)
 
-def getDoctorInfo(access_token):
-	headers = get_auth_header(access_token)
-	response = requests.get('https://drchrono.com/api/users/current', headers=headers)
-	response.raise_for_status()
-	data = response.json()
-	print data
-	# get resepective Doctor's info
+@recharge_token
+def getDoctorInfo(token):
+	payload = {
+	"access_token": token.access_token,
+	"data": {},
+	}
+	return get_api('https://drchrono.com/api/users/current', payload)
 
-def getPatientInfo(firstName, lastName, access_token):
-	headers = get_auth_header(access_token)
+@recharge_token
+def getPatientInfo(token, firstName, lastName):
 	data = {
 	"first_name" : firstName,
 	"last_name" : lastName,
 	}
-	response = requests.get('https://drchrono.com/api/patients', params=data, headers=headers)
-	response.raise_for_status()
-	return response
-	#get respective patients info
+	payload = {
+	"access_token":token.access_token,
+	"data":data,
+	}
+	return get_api('https://drchrono.com/api/patients', payload)
 
-def updatePatientAppointmentData(access_token, appointmentId, status):
+@recharge_token
+def updatePatientAppointmentData(token, appointmentId, status):
+	print token.access_token, appointmentId, status
 	data = {
 	"status" : status
 	}
-	headers = get_auth_header(access_token)
-	response = requests.patch('https://drchrono.com/api/appointments/{0}'.format(appointmentId), data=data, headers = headers)
-	response.raise_for_status()
-	return response
+	payload={
+	'access_token':token.access_token,
+	'data':data,
+	}
+	return patch_api('https://drchrono.com/api/appointments/{0}'.format(appointmentId), payload)
 
-def updatePatientDemographicInfo(access_token, patientId, data):
-	headers = get_auth_header(access_token)
-	response = requests.patch('https://drchrono.com/api/patients/{0}'.format(patientId), data=data, headers = headers)
-	response.raise_for_status()
-	return response
+@recharge_token
+def updatePatientDemographicInfo(token, patientId, data):
+	payload={
+	'access_token':token.access_token,
+	'data':data,
+	}
+	return patch_api('https://drchrono.com/api/patients/{0}'.format(patientId), payload)
 
 def get_auth_header(access_token):
-    return {'Authorization': 'Bearer {0}'.format(access_token)}
+	return {'Authorization': 'Bearer {0}'.format(access_token)}
 
