@@ -4,7 +4,34 @@
 {% block content %}
 
 <div class="text-center">
-{{profile}}
+<center><h2>Profile Info</h2></center>
+<br>
+<table class="table table-striped">
+  	<tr>
+		<td class="active">User Name</td>
+		<td class="success">{{profile.username}}</td>
+	</tr>
+	<tr>
+		<td class="active">Doctor Id</td>
+		<td class="success">{{profile.doctor}}</td>
+	</tr>
+	<tr>
+		<td class="active">Practice Group Id</td>
+		<td class="success">{{profile.practice_group}}</td>
+	</tr>
+	<tr>
+		<td class="active">Is Doctor</td>
+		<td class="success">{{profile.is_doctor}}</td>
+	</tr>
+	<tr>
+		<td class="active">Is Doctor</td>
+		<td class="success">{{profile.is_doctor}}</td>
+	</tr>
+	<tr>
+		<td class="active">Is Staff</td>
+		<td class="success">{{profile.is_staff}}</td>
+	</tr>
+</table>
 </div>
 
 {% endblock %}

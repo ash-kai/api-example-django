@@ -1,10 +1,14 @@
 
 {% extends 'base.html' %}
+{% load date_filters %}
 
 {% block content %}
 
 <div class="text-center">
-<h1> This page would shows appointments for the current day </h1>
+{% if notActive %}
+<h1> The doctor has not arrived yet </h1>
+{% else %}
+<h1 class="panel panel-defaul"> Appointments for Today </h1>
 <table class="table table-striped">
     
     <thead>
@@ -12,6 +16,9 @@
         <th> Scheduled Time </th>
         <th> Duration </th>
         <th> Status </th>
+        <!-- {% if user.is_authenticated %}
+        <th> Waiting Time </th>
+        {% endif %} -->
       </tr>
     </thead>
 
@@ -19,11 +26,22 @@
     {% for appointment in appointments %}
 	
       <tr>
-        <td> {{ appointment.scheduled_time }} </td>
-        <td> {{ appointment.duration }} </td>
+        <td> {{ appointment.scheduled_time|date_format }} </td>
+        <td> {{ appointment.duration|time_format }} </td>
         <td> {{ appointment.status|default_if_none:"" }}  </td>
         {% if user.is_authenticated %}
-        <td> <a href="{{appointment.id}}/stopTimer" class="btn btn-primary">Stop</button> </td>
+        <!-- <td> {{appointment|waiting_time}}</td> -->
+          {% if appointment.status != "Complete" %}
+            {% if appointment.status != "In Session"%}
+            <td> <a href="{{appointment.id}}/{{appointment.scheduled_time}}/stopTimer" class="btn btn-primary">Stop Waiting</button> </td>
+            {% else %}
+            <td></td>
+            {% endif %}
+            <td> <a href="{{appointment.id}}/complete" class="btn btn-primary">Complete Session</button> </td>
+          {% else %}
+            <td></td>
+            <td></td>
+          {% endif %}
         {% endif %}
       </tr>
       
@@ -32,8 +50,12 @@
     </tbody>
   </table>
   <br>
-  <a href="patient" name="checkIn" class="btn btn-primary">Check In</a>
-
+  {% if user.is_authenticated %}
+    <span> Average Time : {{averageTime}} minutes </span>
+  {% else %}
+    <a href='patient' class='btn btn-primary'> Check In </a>
+  {% endif %}
+{% endif %}
 </div>
 
 {% endblock %}

@@ -9,5 +9,5 @@ class Token(models.Model):
 class Appointment(models.Model):
 	appointmentId = models.CharField(max_length=200)
 	checkIn = models.DateTimeField()
-	# scheduled_time = models.DateTimeField()
+	scheduled_time = models.DateTimeField(null=True)
 	inSession = models.DateTimeField(null=True)

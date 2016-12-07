@@ -1,5 +1,6 @@
 #To perform various miscellaneous tasks
 from datetime import datetime
+from .models import Appointment
 
 def validatePatient(parameter):
 	pass
@@ -37,3 +38,19 @@ def getLatestAppointment(patientAppointments):
 				else:
 					break
 	return index
+
+def getAverageTime():
+	average = []
+	cnt = 0 
+	appointments = Appointment.objects.filter(scheduled_time__startswith = datetime.now().date())
+	for appointment in appointments:
+		if appointment.checkIn is not None and appointment.inSession is not None:
+			cnt+=1
+			if (appointment.checkIn-appointment.scheduled_time).total_seconds()<0:
+				startTime = appointment.scheduled_time
+			else:
+				startTime = appointment.checkIn
+			average.append((appointment.inSession-startTime).total_seconds())
+	if cnt==0:
+		return 0
+	return sum(average)/cnt
